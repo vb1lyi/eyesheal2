@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Eye Reset — a 4 minute eye workout</title>
+<style>
+  :root {
+    --ink: #e8eef8;
+    --muted: #8ba0bd;
+    --accent: #6ee7c8;
+    --accent-2: #7dd3fc;
+    --card: rgba(16, 26, 43, .74);
+    --line: rgba(125, 211, 252, .14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: var(--ink);
+    background:
+      radial-gradient(1100px 640px at 50% -12%, #16263d 0%, #080c14 58%, #05070c 100%);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .card {
+    width: min(560px, 100%);
+    padding: 30px 30px 26px;
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    background: var(--card);
+    box-shadow: 0 30px 80px -40px #000, inset 0 1px 0 rgba(255, 255, 255, .05);
+  }
+
+  .screen { display: none; }
+  .screen.is-active { display: block; animation: rise .45s ease both; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ---------- start screen ---------- */
+  .eyebrow {
+    margin: 0 0 14px;
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: clamp(1.6rem, 5vw, 2.15rem);
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    font-weight: 600;
+  }
+
+  .lede { margin: 0 0 26px; color: var(--muted); line-height: 1.6; font-size: 1rem; }
+
+  .start-link {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 4px 0;
+    font: inherit;
+    font-size: 1.5rem;
+    letter-spacing: .01em;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 7px;
+    text-decoration-color: rgba(110, 231, 200, .45);
+    transition: color .2s, text-decoration-color .2s;
+  }
+  .start-link:hover,
+  .start-link:focus-visible { color: #a7f3e0; text-decoration-color: currentColor; }
+  .start-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 4px; }
+
+  .meta {
+    margin: 24px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: .84rem;
+    line-height: 1.7;
+  }
+
+  /* ---------- workout screen ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .counter {
+    font-size: .74rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .counter b { color: var(--accent-2); font-weight: 600; }
+
+  .tools { display: flex; gap: 6px; }
+
+  .icon-btn {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: rgba(125, 211, 252, .05);
+    color: var(--muted);
+    cursor: pointer;
+    transition: color .2s, background .2s, border-color .2s;
+  }
+  .icon-btn:hover { color: var(--ink); background: rgba(125, 211, 252, .12); }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .icon-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-btn[aria-pressed="false"] .off-mark { opacity: 1; }
+
+  h2.title {
+    margin: 0 0 8px;
+    font-size: clamp(1.4rem, 4.4vw, 1.8rem);
+    letter-spacing: -.015em;
+    font-weight: 600;
+  }
+
+  .desc {
+    margin: 0;
+    min-height: 3.2em;
+    color: var(--muted);
+    font-size: .95rem;
+    line-height: 1.6;
+  }
+
+  .scene {
+    display: block;
+    width: 100%;
+    max-width: 430px;
+    height: auto;
+    margin: 14px auto 4px;
+    animation: sceneIn .45s ease both;
+  }
+  @keyframes sceneIn {
+    from { opacity: 0; transform: scale(.975); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .bar {
+    height: 6px;
+    margin: 18px 0 16px;
+    border-radius: 99px;
+    background: rgba(125, 211, 252, .13);
+    overflow: hidden;
+  }
+  .bar > i {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+
+  .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  .clock {
+    font-variant-numeric: tabular-nums;
+    font-size: 1.35rem;
+    letter-spacing: .01em;
+    color: var(--ink);
+    opacity: .92;
+  }
+
+  .ghost {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: rgba(125, 211, 252, .05);
+    color: var(--muted);
+    font: inherit;
+    font-size: .85rem;
+    padding: 9px 16px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: color .2s, background .2s;
+  }
+  .ghost:hover { color: var(--ink); background: rgba(125, 211, 252, .13); }
+  .ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .ghost[disabled] { opacity: .4; cursor: default; }
+
+  .paused-badge {
+    display: none;
+    margin: 0 0 10px;
+    font-size: .75rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .is-paused .paused-badge { display: block; }
+
+  /* ---------- done screen ---------- */
+  .done-ring {
+    width: 74px;
+    height: 74px;
+    margin: 0 0 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(110, 231, 200, .4);
+    background: radial-gradient(circle at 50% 40%, rgba(110, 231, 200, .16), transparent 70%);
+    color: var(--accent);
+  }
+  .done-ring svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---------- shared SVG styling ---------- */
+  .sclera { fill: #f2f7ff; }
+  .lid-line { fill: none; stroke: rgba(125, 211, 252, .55); stroke-width: 3; }
+  .iris { fill: url(#irisGrad); }
+  .pupil { fill: #0a1120; }
+  .glint { fill: #ffffff; opacity: .82; }
+  .chev { fill: none; stroke: rgba(125, 211, 252, .5); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+  .eye-group { transform-box: fill-box; transform-origin: center; }
+
+  /* blink */
+  .s-blink .eye-group { animation: blink 4.6s ease-in-out infinite; }
+  @keyframes blink {
+    0%, 62%   { transform: scaleY(1); }
+    70%, 74%  { transform: scaleY(.16); }
+    88%, 100% { transform: scaleY(1); }
+  }
+
+  /* squeeze & release */
+  .s-squeeze .eye-group { animation: squeeze 4s ease-in-out infinite; }
+  @keyframes squeeze {
+    0%, 8%    { transform: scaleY(1) scaleX(1); }
+    30%, 52%  { transform: scaleY(.11) scaleX(1.03); }
+    78%, 100% { transform: scaleY(1) scaleX(1); }
+  }
+
+  /* left & right */
+  .s-look .gaze { animation: lookLR 7s ease-in-out infinite; }
+  @keyframes lookLR {
+    0%, 8%    { transform: translateX(0); }
+    22%, 40%  { transform: translateX(34px); }
+    58%, 76%  { transform: translateX(-34px); }
+    92%, 100% { transform: translateX(0); }
+  }
+
+  /* up & down */
+  .s-updown .gaze { animation: lookUD 6s ease-in-out infinite; }
+  @keyframes lookUD {
+    0%, 8%    { transform: translateY(0); }
+    22%, 40%  { transform: translateY(-21px); }
+    58%, 76%  { transform: translateY(21px); }
+    92%, 100% { transform: translateY(0); }
+  }
+
+  /* circles */
+  .s-circle .gaze { animation: lookCircle 8s linear infinite; }
+  @keyframes lookCircle {
+    0%    { transform: translate(0, -26px); }
+    12.5% { transform: translate(18px, -18px); }
+    25%   { transform: translate(26px, 0); }
+    37.5% { transform: translate(18px, 18px); }
+    50%   { transform: translate(0, 26px); }
+    62.5% { transform: translate(-18px, 18px); }
+    75%   { transform: translate(-26px, 0); }
+    87.5% { transform: translate(-18px, -18px); }
+    100%  { transform: translate(0, -26px); }
+  }
+
+  /* near & far */
+  .s-near .gaze { animation: nearFar 8s ease-in-out infinite; }
+  @keyframes nearFar {
+    0%, 6%    { transform: translate(0, 0) scale(1); }
+    30%, 46%  { transform: translate(-15px, 9px) scale(.9); }
+    70%, 86%  { transform: translate(13px, -8px) scale(1.07); }
+    100%      { transform: translate(0, 0) scale(1); }
+  }
+  .near-dot, .far-dot, .dot-ring { transform-box: fill-box; transform-origin: center; }
+  .dot-ring { fill: none; stroke-width: 1.4; }
+  .dot-ring.near { stroke: rgba(110, 231, 200, .3); }
+  .dot-ring.far  { stroke: rgba(125, 211, 252, .3); }
+  .near-dot { fill: rgba(110, 231, 200, .55); animation: dotNear 8s ease-in-out infinite; }
+  .far-dot  { fill: rgba(125, 211, 252, .55); animation: dotFar 8s ease-in-out infinite; }
+  @keyframes dotNear {
+    0%, 6%, 100% { opacity: .22; transform: scale(.85); }
+    30%, 46%     { opacity: 1;   transform: scale(1.15); }
+  }
+  @keyframes dotFar {
+    0%, 6%, 100% { opacity: .22; transform: scale(.85); }
+    70%, 86%     { opacity: 1;   transform: scale(1.15); }
+  }
+
+  /* distant landscape */
+  .sun-glow { fill: url(#sunGlow); animation: glow 7s ease-in-out infinite; }
+  .sun { fill: #ffdca6; opacity: .85; }
+  @keyframes glow { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+  .hill.h1 { fill: #1b2b43; }
+  .hill.h2 { fill: #16243a; }
+  .ground  { fill: #0e1725; }
+  .trunk   { fill: #22334d; }
+  .canopy  { fill: #24544c; }
+  .focus-ring {
+    fill: none;
+    stroke: rgba(110, 231, 200, .55);
+    stroke-width: 1.6;
+    stroke-dasharray: 5 7;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: focusPulse 4s ease-in-out infinite;
+  }
+  @keyframes focusPulse {
+    0%, 100% { opacity: .25; transform: scale(.86); }
+    50%      { opacity: .95; transform: scale(1.04); }
+  }
+
+  /* palming */
+  .warm {
+    fill: rgba(255, 186, 128, .16);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%, 100% { transform: scale(.92); opacity: .6; } 50% { transform: scale(1.06); opacity: 1; } }
+  .closed { fill: none; stroke: rgba(232, 238, 248, .6); stroke-width: 3; stroke-linecap: round; }
+  .palm, .finger {
+    fill: rgba(255, 196, 140, .1);
+    stroke: rgba(255, 196, 140, .34);
+    stroke-width: 1.5;
+  }
+  .palms { animation: settle 6s ease-in-out infinite; }
+  @keyframes settle { 0%, 100% { opacity: .85; } 50% { opacity: 1; } }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen.is-active, .scene { animation: none; }
+    .sun, .warm, .palms { animation: none; }
+  }
+
+  @media (max-width: 440px) {
+    .card { padding: 24px 20px 20px; border-radius: 20px; }
+    .desc { min-height: 4.8em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- shared SVG definitions -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <clipPath id="eyeClip">
+      <path d="M40 130 C110 52 290 52 360 130 C290 205 110 205 40 130 Z"/>
+    </clipPath>
+    <radialGradient id="irisGrad" cx="42%" cy="36%" r="72%">
+      <stop offset="0%"  stop-color="#74c9b6"/>
+      <stop offset="55%" stop-color="#3f8f96"/>
+      <stop offset="100%" stop-color="#1d4a5c"/>
+    </radialGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffd69e" stop-opacity=".5"/>
+      <stop offset="45%"  stop-color="#ffc98a" stop-opacity=".18"/>
+      <stop offset="100%" stop-color="#ffbe7a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
+
+<main class="card">
+
+  <!-- ============ start ============ -->
+  <section id="screen-start" class="screen is-active">
+    <p class="eyebrow">4 minute eye workout</p>
+    <h1>Give your eyes a break.</h1>
+    <p class="lede">
+      Eight short exercises to release screen strain, reset focus and let your eyes
+      move the way they were built to move. Sit back, keep your head still, and follow the eye.
+    </p>
+    <button id="startBtn" class="start-link" type="button">Start</button>
+    <p class="meta">
+      3 min 40 s &middot; sound on for the voice cues &middot; works offline<br>
+      Stop at any time if anything feels uncomfortable.
+    </p>
+  </section>
+
+  <!-- ============ workout ============ -->
+  <section id="screen-work" class="screen">
+    <div class="topbar">
+      <span class="counter"><b id="stepNo">1</b> / <span id="stepTotal">8</span></span>
+      <div class="tools">
+        <button id="soundBtn" class="icon-btn" type="button" aria-pressed="true" aria-label="Mute voice cues" title="Mute voice cues">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4z"/>
+            <path class="wave" d="M16.5 8.5a5 5 0 0 1 0 7"/>
+            <path class="off-mark" d="M17 9l5 6M22 9l-5 6" style="opacity:0"/>
+          </svg>
+        </button>
+        <button id="exitBtn" class="icon-btn" type="button" aria-label="End workout" title="End workout">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="paused-badge">Paused</p>
+    <h2 class="title" id="exTitle">Slow blinking</h2>
+    <p class="desc" id="exDesc"></p>
+
+    <div id="sceneHost"></div>
+
+    <div class="bar"><i id="progress"></i></div>
+
+    <div class="foot">
+      <span class="clock" id="clock">0:20</span>
+      <div style="display:flex;gap:8px">
+        <button id="pauseBtn" class="ghost" type="button">Pause</button>
+        <button id="skipBtn" class="ghost" type="button">Skip</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ done ============ -->
+  <section id="screen-done" class="screen">
+    <div class="done-ring">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+    </div>
+    <p class="eyebrow">Workout complete</p>
+    <h1>Eyes, reset.</h1>
+    <p class="lede">
+      You just spent <span id="doneTime">3:40</span> away from the screen.
+      Try this again in a couple of hours &mdash; little and often beats one long session.
+    </p>
+    <button id="againBtn" class="start-link" type="button">Start again</button>
+  </section>
+
+  <p class="sr-only" id="live" aria-live="polite"></p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var EYE = 'M40 130 C110 52 290 52 360 130 C290 205 110 205 40 130 Z';
+
+  function eyeSVG(sceneClass, before, after) {
+    return '<svg class="scene ' + sceneClass + '" viewBox="0 0 400 260" aria-hidden="true">' +
+      (before || '') +
+      '<g class="eye-group">' +
+        '<path class="sclera" d="' + EYE + '"/>' +
+        '<g clip-path="url(#eyeClip)">' +
+          '<g class="gaze">' +
+            '<circle class="iris" cx="200" cy="130" r="46"/>' +
+            '<circle class="pupil" cx="200" cy="130" r="21"/>' +
+            '<circle class="glint" cx="186" cy="116" r="8"/>' +
+          '</g>' +
+        '</g>' +
+        '<path class="lid-line" d="' + EYE + '"/>' +
+      '</g>' +
+      (after || '') +
+    '</svg>';
+  }
+
+  var EXERCISES = [
+    {
+      title: 'Slow blinking',
+      desc: 'Gently close your eyes, let them rest shut for a moment, then open them slowly. No squinting — your eyelids do the work.',
+      secs: 20,
+      scene: function () { return eyeSVG('s-blink'); },
+      say: 'Slow blinking. Close your eyes gently, then open them slowly.'
+    },
+    {
+      title: 'Left & right',
+      desc: 'Keep your head still and move only your eyes — all the way left, then all the way right. Follow the eye in the picture.',
+      secs: 30,
+      scene: function () {
+        return eyeSVG('s-look',
+          '<path class="chev" d="M36 112 L18 130 L36 148"/>' +
+          '<path class="chev" d="M364 112 L382 130 L364 148"/>');
+      },
+      say: 'Left and right. Keep your head still, only the eyes move.'
+    },
+    {
+      title: 'Up & down',
+      desc: 'Still head. Look up toward your eyebrows, hold a beat, then down toward your nose. Slow and steady.',
+      secs: 25,
+      scene: function () {
+        return eyeSVG('s-updown',
+          '<path class="chev" d="M182 44 L200 26 L218 44"/>' +
+          '<path class="chev" d="M182 216 L200 234 L218 216"/>');
+      },
+      say: 'Up and down. Head still, eyes only.'
+    },
+    {
+      title: 'Eye circles',
+      desc: 'Trace one big, slow circle with your eyes. A few rounds clockwise, then reverse. Keep it smooth and lazy.',
+      secs: 30,
+      scene: function () { return eyeSVG('s-circle'); },
+      say: 'Roll your eyes in a slow, wide circle.'
+    },
+    {
+      title: 'Near & far',
+      desc: 'Look at something close — a finger or a mug — then shift to the furthest thing you can see. Alternate as the dots light up.',
+      secs: 30,
+      scene: function () {
+        return eyeSVG('s-near',
+          '<circle class="dot-ring near" cx="58" cy="198" r="33"/>' +
+          '<circle class="dot-ring far" cx="338" cy="64" r="17"/>' +
+          '<circle class="near-dot" cx="58" cy="198" r="24"/>' +
+          '<circle class="far-dot" cx="338" cy="64" r="10"/>');
+      },
+      say: 'Near, then far. Let your focus stretch.'
+    },
+    {
+      title: 'Look far away',
+      desc: 'The 20-20-20 rule: every 20 minutes, look 20 feet away for 20 seconds. Let your eyes soften and stop trying.',
+      secs: 30,
+      scene: function () {
+        return '<svg class="scene s-far" viewBox="0 0 400 260" aria-hidden="true">' +
+          '<circle class="sun-glow" cx="300" cy="64" r="54"/>' +
+          '<circle class="sun" cx="300" cy="64" r="18"/>' +
+          '<path class="hill h1" d="M-20 214 L108 112 L236 214 Z"/>' +
+          '<path class="hill h2" d="M150 214 L268 104 L412 214 Z"/>' +
+          '<rect class="ground" x="0" y="200" width="400" height="60"/>' +
+          '<rect class="trunk" x="126" y="164" width="7" height="38" rx="3"/>' +
+          '<circle class="canopy" cx="129" cy="150" r="26"/>' +
+          '<circle class="focus-ring" cx="129" cy="150" r="38"/>' +
+        '</svg>';
+      },
+      say: 'Look far away. Let your eyes relax into the distance.'
+    },
+    {
+      title: 'Palming',
+      desc: 'Cup your warm palms over closed eyes without pressing. Breathe in for four, out for six. Complete darkness and warmth.',
+      secs: 30,
+      scene: function () {
+        return '<svg class="scene s-palm" viewBox="0 0 400 260" aria-hidden="true">' +
+          '<circle class="warm" cx="200" cy="132" r="114"/>' +
+          '<path class="closed" d="M92 132 C112 110 152 110 172 132"/>' +
+          '<path class="closed" d="M228 132 C248 110 288 110 308 132"/>' +
+          '<g class="palms">' +
+            '<g transform="rotate(-9 122 152)">' +
+              '<rect class="finger" x="72" y="70" width="26" height="44" rx="13"/>' +
+              '<rect class="finger" x="104" y="62" width="26" height="52" rx="13"/>' +
+              '<rect class="finger" x="136" y="70" width="26" height="44" rx="13"/>' +
+              '<rect class="palm" x="54" y="96" width="136" height="120" rx="40"/>' +
+            '</g>' +
+            '<g transform="rotate(9 278 152)">' +
+              '<rect class="finger" x="238" y="70" width="26" height="44" rx="13"/>' +
+              '<rect class="finger" x="270" y="62" width="26" height="52" rx="13"/>' +
+              '<rect class="finger" x="302" y="70" width="26" height="44" rx="13"/>' +
+              '<rect class="palm" x="210" y="96" width="136" height="120" rx="40"/>' +
+            '</g>' +
+          '</g>' +
+        '</svg>';
+      },
+      say: 'Palming. Cover your closed eyes with warm palms and breathe.'
+    },
+    {
+      title: 'Squeeze & release',
+      desc: 'Squeeze your eyes shut firmly, hold for a few seconds, then let go completely. The release is the part that matters.',
+      secs: 25,
+      scene: function () { return eyeSVG('s-squeeze'); },
+      say: 'Squeeze your eyes shut, then let go completely.'
+    }
+  ];
+
+  var TOTAL = EXERCISES.reduce(function (sum, ex) { return sum + ex.secs; }, 0);
+
+  var $ = function (id) { return document.getElementById(id); };
+  var sceneHost = $('sceneHost');
+  var exTitle = $('exTitle');
+  var exDesc = $('exDesc');
+  var clockEl = $('clock');
+  var progressEl = $('progress');
+  var stepNo = $('stepNo');
+  var pauseBtn = $('pauseBtn');
+  var skipBtn = $('skipBtn');
+  var soundBtn = $('soundBtn');
+  var workScreen = $('screen-work');
+
+  var S = {
+    idx: 0,
+    running: false,
+    paused: false,
+    remain: 0,
+    deadline: 0,
+    raf: 0,
+    elapsedBefore: 0,
+    soundOn: true,
+    speechTimer: 0
+  };
+
+  /* ---------------- audio ---------------- */
+
+  var actx = null;
+
+  function audioCtx() {
+    if (!actx) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      try { actx = new Ctx(); } catch (e) { return null; }
+    }
+    if (actx.state === 'suspended') { actx.resume(); }
+    return actx;
+  }
+
+  function chime() {
+    if (!S.soundOn) return;
+    var ctx = audioCtx();
+    if (!ctx) return;
+    var t0 = ctx.currentTime;
+    [880, 1174.66].forEach(function (freq, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      var at = t0 + i * 0.13;
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.linearRampToValueAtTime(0.16, at + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 1.1);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(at);
+      osc.stop(at + 1.2);
+    });
+  }
+
+  function speak(text, delay) {
+    window.clearTimeout(S.speechTimer);
+    if (!S.soundOn || !('speechSynthesis' in window)) return;
+    S.speechTimer = window.setTimeout(function () {
+      try {
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.94;
+        u.pitch = 1;
+        u.volume = 1;
+        u.lang = 'en-US';
+        window.speechSynthesis.speak(u);
+      } catch (e) { /* speech is a nicety, never fatal */ }
+    }, delay || 0);
+  }
+
+  function hush() {
+    window.clearTimeout(S.speechTimer);
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+  }
+
+  /* ---------------- rendering ---------------- */
+
+  function fmt(seconds) {
+    var s = Math.max(0, Math.ceil(seconds));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function show(screenId) {
+    ['screen-start', 'screen-work', 'screen-done'].forEach(function (id) {
+      $(id).classList.toggle('is-active', id === screenId);
+    });
+  }
+
+  function renderExercise() {
+    var ex = EXERCISES[S.idx];
+    sceneHost.innerHTML = ex.scene();
+    exTitle.textContent = ex.title;
+    exDesc.textContent = ex.desc;
+    stepNo.textContent = String(S.idx + 1);
+    $('live').textContent = 'Exercise ' + (S.idx + 1) + ' of ' + EXERCISES.length + ': ' + ex.title + '. ' + ex.desc;
+  }
+
+  function renderTime() {
+    var ex = EXERCISES[S.idx];
+    clockEl.textContent = fmt(S.remain);
+    var done = S.elapsedBefore + (ex.secs - S.remain);
+    progressEl.style.width = Math.min(100, (done / TOTAL) * 100) + '%';
+  }
+
+  /* ---------------- timing ---------------- */
+
+  function loop() {
+    if (!S.running) return;
+    if (!S.paused) {
+      S.remain = Math.max(0, (S.deadline - performance.now()) / 1000);
+      renderTime();
+      if (S.remain <= 0) { endExercise(); return; }
+    }
+    S.raf = requestAnimationFrame(loop);
+  }
+
+  function startClock() {
+    cancelAnimationFrame(S.raf);
+    S.running = true;
+    S.paused = false;
+    workScreen.classList.remove('is-paused');
+    pauseBtn.textContent = 'Pause';
+    S.remain = EXERCISES[S.idx].secs;
+    S.deadline = performance.now() + S.remain * 1000;
+    renderTime();
+    S.raf = requestAnimationFrame(loop);
+  }
+
+  function beginExercise() {
+    renderExercise();
+    startClock();
+    var ex = EXERCISES[S.idx];
+    speak(ex.title + '. ' + ex.say, S.idx === 0 ? 0 : 700);
+  }
+
+  function endExercise() {
+    cancelAnimationFrame(S.raf);
+    S.running = false;
+    var ex = EXERCISES[S.idx];
+    S.elapsedBefore += ex.secs;
+    chime();
+
+    if (S.idx >= EXERCISES.length - 1) {
+      finish();
+      return;
+    }
+    S.idx += 1;
+    beginExercise();
+  }
+
+  function finish() {
+    S.running = false;
+    cancelAnimationFrame(S.raf);
+    progressEl.style.width = '100%';
+    $('doneTime').textContent = fmt(TOTAL);
+    show('screen-done');
+    chime();
+    speak('Workout complete. Your eyes thank you.', 900);
+  }
+
+  function pause() {
+    if (!S.running || S.paused) return;
+    S.paused = true;
+    cancelAnimationFrame(S.raf);   // one timer chain only; resume() restarts it
+    S.remain = Math.max(0, (S.deadline - performance.now()) / 1000);
+    workScreen.classList.add('is-paused');
+    pauseBtn.textContent = 'Resume';
+    hush();
+  }
+
+  function resume() {
+    if (!S.running || !S.paused) return;
+    S.paused = false;
+    S.deadline = performance.now() + S.remain * 1000;
+    workScreen.classList.remove('is-paused');
+    pauseBtn.textContent = 'Pause';
+    S.raf = requestAnimationFrame(loop);
+  }
+
+  function startWorkout() {
+    S.idx = 0;
+    S.elapsedBefore = 0;
+    S.paused = false;
+    S.running = false;
+    $('stepTotal').textContent = String(EXERCISES.length);
+    audioCtx();          // unlocked by this click
+    show('screen-work');
+    beginExercise();
+  }
+
+  function exitWorkout() {
+    S.running = false;
+    cancelAnimationFrame(S.raf);
+    hush();
+    show('screen-start');
+  }
+
+  /* ---------------- controls ---------------- */
+
+  $('startBtn').addEventListener('click', startWorkout);
+  $('againBtn').addEventListener('click', startWorkout);
+
+  pauseBtn.addEventListener('click', function () {
+    if (S.paused) { resume(); } else { pause(); }
+  });
+
+  skipBtn.addEventListener('click', function () {
+    if (!S.running) return;
+    endExercise();
+  });
+
+  $('exitBtn').addEventListener('click', exitWorkout);
+
+  soundBtn.addEventListener('click', function () {
+    S.soundOn = !S.soundOn;
+    soundBtn.setAttribute('aria-pressed', String(S.soundOn));
+    soundBtn.setAttribute('aria-label', S.soundOn ? 'Mute voice cues' : 'Unmute voice cues');
+    soundBtn.title = soundBtn.getAttribute('aria-label');
+    soundBtn.querySelector('.wave').style.opacity = S.soundOn ? '1' : '0';
+    soundBtn.querySelector('.off-mark').style.opacity = S.soundOn ? '0' : '1';
+    if (!S.soundOn) { hush(); } else { chime(); }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!$('screen-work').classList.contains('is-active')) return;
+    if (e.code === 'Space') { e.preventDefault(); if (S.paused) { resume(); } else { pause(); } }
+    else if (e.code === 'ArrowRight') { e.preventDefault(); if (S.running) endExercise(); }
+    else if (e.code === 'Escape') { exitWorkout(); }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { pause(); }
+  });
+})();
+</script>
+</body>
+</html>
