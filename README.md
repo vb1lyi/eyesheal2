@@ -1,4 +1,4 @@
-# Eye Reset
+# Eyes Heal
 
 A 4-minute guided eye exercise workout in a single HTML file — no build, no dependencies.
 
@@ -17,4 +17,4 @@ Voice cues guide you through each step and can be muted.
 
 ## Usage
 
-Open `index.html` in any modern browser.
+Use it online at https://vb1lyi.github.io/eyesheal2/, or open `index.html` in any modern browser.
