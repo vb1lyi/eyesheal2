@@ -490,7 +490,7 @@
       desc: 'Gently close your eyes, let them rest shut for a moment, then open them slowly. No squinting — your eyelids do the work.',
       secs: 20,
       scene: function () { return eyeSVG('s-blink'); },
-      say: 'Slow blinking. Close your eyes gently, then open them slowly.'
+      say: 'Close your eyes gently. Let them rest shut, then open them slowly.'
     },
     {
       title: 'Left & right',
@@ -501,7 +501,7 @@
           '<path class="chev" d="M36 112 L18 130 L36 148"/>' +
           '<path class="chev" d="M364 112 L382 130 L364 148"/>');
       },
-      say: 'Left and right. Keep your head still, only the eyes move.'
+      say: 'Keep your head still. Only your eyes move. Left, and right.'
     },
     {
       title: 'Up & down',
@@ -512,7 +512,7 @@
           '<path class="chev" d="M182 44 L200 26 L218 44"/>' +
           '<path class="chev" d="M182 216 L200 234 L218 216"/>');
       },
-      say: 'Up and down. Head still, eyes only.'
+      say: 'Head still. Eyes up, then down.'
     },
     {
       title: 'Eye circles',
@@ -532,7 +532,7 @@
           '<circle class="near-dot" cx="58" cy="198" r="24"/>' +
           '<circle class="far-dot" cx="338" cy="64" r="10"/>');
       },
-      say: 'Near, then far. Let your focus stretch.'
+      say: 'Look at something close, then shift to the furthest thing you can see.'
     },
     {
       title: 'Look far away',
@@ -550,7 +550,7 @@
           '<circle class="focus-ring" cx="129" cy="150" r="38"/>' +
         '</svg>';
       },
-      say: 'Look far away. Let your eyes relax into the distance.'
+      say: 'Let your eyes soften. Stop trying to focus.'
     },
     {
       title: 'Palming',
@@ -577,7 +577,7 @@
           '</g>' +
         '</svg>';
       },
-      say: 'Palming. Cover your closed eyes with warm palms and breathe.'
+      say: 'Cover your closed eyes with warm palms, and breathe.'
     },
     {
       title: 'Squeeze & release',
@@ -614,6 +614,62 @@
     speechTimer: 0
   };
 
+  /* ---------------- voice selection ---------------- */
+
+  // Comedy and legacy voices that ship with macOS. Never read cues in these.
+  var NOVELTY_VOICE = /^(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|fred|good news|grandma|grandpa|hysterical|jester|junior|kathy|organ|pipe organ|ralph|rocko|shelley|superstar|trinoids|whisper|wobble|zarvox)$/;
+
+  // Preferred voices, best first. Region suffix like " (English (US))" is stripped before matching.
+  var PREFERRED_VOICE = [
+    'ava', 'zoe', 'allison', 'samantha', 'alex', 'evan', 'nathan', 'joelle', 'noelle',
+    'serena', 'daniel', 'karen', 'moira', 'tessa', 'google us english',
+    'google uk english female', 'eddy', 'flo', 'reed', 'sandy', 'aria', 'jenny', 'guy', 'siri'
+  ];
+
+  var voice = null;
+
+  function voiceKey(name) {
+    var i = name.indexOf(' (');
+    return (i < 0 ? name : name.slice(0, i)).trim().toLowerCase();
+  }
+
+  function scoreVoice(v) {
+    if (!v || !/^en[-_]/i.test(v.lang || '')) return -1;
+    var key = voiceKey(v.name || '');
+    if (!key || NOVELTY_VOICE.test(key)) return -1;
+    var score = 0;
+    var rank = PREFERRED_VOICE.indexOf(key);
+    if (rank >= 0) score += 400 - rank * 8;
+    if (/premium|enhanced/i.test(v.name)) score += 150;
+    if (/google|microsoft|natural/i.test(v.name)) score += 80;
+    if (/^en[-_]us$/i.test(v.lang)) score += 40;
+    if (/compact/i.test(v.name)) score -= 40;
+    if (v.localService) score += 10;
+    return score;
+  }
+
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return;
+    var voices;
+    try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { return; }
+    if (!voices.length) return;   // Chrome fills the list later; voiceschanged brings us back
+    var best = null;
+    var bestScore = 0;
+    for (var i = 0; i < voices.length; i++) {
+      var s = scoreVoice(voices[i]);
+      if (s > bestScore) { bestScore = s; best = voices[i]; }
+    }
+    // Leave null when nothing scored: better to let the engine choose than to force a bad voice.
+    voice = best;
+  }
+
+  pickVoice();
+  if ('speechSynthesis' in window && window.speechSynthesis.addEventListener) {
+    window.speechSynthesis.addEventListener('voiceschanged', function () {
+      if (!voice) pickVoice();
+    });
+  }
+
   /* ---------------- audio ---------------- */
 
   var actx = null;
@@ -636,32 +692,45 @@
     [880, 1174.66].forEach(function (freq, i) {
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
-      var at = t0 + i * 0.13;
+      var at = t0 + i * 0.09;
       osc.type = 'sine';
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.0001, at);
-      gain.gain.linearRampToValueAtTime(0.16, at + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, at + 1.1);
+      gain.gain.linearRampToValueAtTime(0.13, at + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
       osc.connect(gain).connect(ctx.destination);
       osc.start(at);
-      osc.stop(at + 1.2);
+      osc.stop(at + 0.55);
     });
   }
 
   function speak(text, delay) {
     window.clearTimeout(S.speechTimer);
     if (!S.soundOn || !('speechSynthesis' in window)) return;
-    S.speechTimer = window.setTimeout(function () {
+
+    function say() {
       try {
-        window.speechSynthesis.cancel();
+        var synth = window.speechSynthesis;
+        // Cancelling unconditionally clips the first syllable of the cue we are about to queue.
+        if (synth.speaking || synth.pending) synth.cancel();
+        if (!voice) pickVoice();
         var u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.94;
+        if (voice) {
+          u.voice = voice;
+          u.lang = voice.lang;
+        } else {
+          u.lang = 'en-US';
+        }
+        u.rate = 1;
         u.pitch = 1;
         u.volume = 1;
-        u.lang = 'en-US';
-        window.speechSynthesis.speak(u);
+        synth.speak(u);
       } catch (e) { /* speech is a nicety, never fatal */ }
-    }, delay || 0);
+    }
+
+    // No delay: speak inside the caller's user-gesture turn, which iOS/Safari require.
+    if (delay) { S.speechTimer = window.setTimeout(say, delay); }
+    else { say(); }
   }
 
   function hush() {
@@ -728,7 +797,7 @@
     renderExercise();
     startClock();
     var ex = EXERCISES[S.idx];
-    speak(ex.title + '. ' + ex.say, S.idx === 0 ? 0 : 700);
+    speak(ex.say, S.idx === 0 ? 0 : 700);
   }
 
   function endExercise() {
