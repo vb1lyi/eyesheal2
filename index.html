@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Eyes Heal — a 4 minute eye workout</title>
+<title>Eyes Heal — a quick eye workout</title>
 <style>
   :root {
     --ink: #e8eef8;
@@ -271,7 +271,8 @@
   }
 
   /* circles */
-  .s-circle .gaze { animation: lookCircle 8s linear infinite; }
+  /* alternate: one round clockwise, then one round back */
+  .s-circle .gaze { animation: lookCircle 7.5s linear infinite alternate; }
   @keyframes lookCircle {
     0%    { transform: translate(0, -26px); }
     12.5% { transform: translate(18px, -18px); }
@@ -359,7 +360,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .screen.is-active, .scene { animation: none; }
-    .sun, .warm, .palms { animation: none; }
+    .sun-glow, .warm, .palms { animation: none; }
   }
 
   @media (max-width: 440px) {
@@ -393,7 +394,7 @@
 
   <!-- ============ start ============ -->
   <section id="screen-start" class="screen is-active">
-    <p class="eyebrow">4 minute eye workout</p>
+    <p class="eyebrow">Quick eye workout</p>
     <h1>Give your eyes a break.</h1>
     <p class="lede">
       Eight short exercises to release screen strain, reset focus and let your eyes
@@ -401,7 +402,8 @@
     </p>
     <button id="startBtn" class="start-link" type="button">Start</button>
     <p class="meta">
-      3 min 40 s &middot; sound on for the voice cues &middot; works offline<br>
+      <span id="totalTime">3 min 40 s</span> &middot; sound on for the voice cues<br>
+      Tip: between sessions, every 20 minutes look 20 feet away for 20 seconds.<br>
       Stop at any time if anything feels uncomfortable.
     </p>
   </section>
@@ -516,10 +518,10 @@
     },
     {
       title: 'Eye circles',
-      desc: 'Trace one big, slow circle with your eyes. A few rounds clockwise, then reverse. Keep it smooth and lazy.',
+      desc: 'Trace one big, slow circle with your eyes, then reverse and circle back the other way. Keep it smooth and lazy.',
       secs: 30,
       scene: function () { return eyeSVG('s-circle'); },
-      say: 'Roll your eyes in a slow, wide circle.'
+      say: 'Roll your eyes in a slow, wide circle, then back the other way.'
     },
     {
       title: 'Near & far',
@@ -536,7 +538,7 @@
     },
     {
       title: 'Look far away',
-      desc: 'The 20-20-20 rule: every 20 minutes, look 20 feet away for 20 seconds. Let your eyes soften and stop trying.',
+      desc: 'Rest your gaze on the furthest point you can see, at least 20 feet away. Let your eyes soften and stop trying.',
       secs: 30,
       scene: function () {
         return '<svg class="scene s-far" viewBox="0 0 400 260" aria-hidden="true">' +
@@ -589,6 +591,8 @@
   ];
 
   var TOTAL = EXERCISES.reduce(function (sum, ex) { return sum + ex.secs; }, 0);
+  document.getElementById('totalTime').textContent =
+    Math.floor(TOTAL / 60) + ' min' + (TOTAL % 60 ? ' ' + (TOTAL % 60) + ' s' : '');
 
   var $ = function (id) { return document.getElementById(id); };
   var sceneHost = $('sceneHost');
@@ -610,6 +614,7 @@
     deadline: 0,
     raf: 0,
     elapsedBefore: 0,
+    spent: 0,
     soundOn: true,
     speechTimer: 0
   };
@@ -684,8 +689,8 @@
     return actx;
   }
 
+  // The chime is not tied to the voice mute: it is the only cue to open your eyes after palming or squeezing.
   function chime() {
-    if (!S.soundOn) return;
     var ctx = audioCtx();
     if (!ctx) return;
     var t0 = ctx.currentTime;
@@ -804,6 +809,8 @@
     cancelAnimationFrame(S.raf);
     S.running = false;
     var ex = EXERCISES[S.idx];
+    var left = S.paused ? S.remain : Math.max(0, (S.deadline - performance.now()) / 1000);
+    S.spent += ex.secs - left;
     S.elapsedBefore += ex.secs;
     chime();
 
@@ -819,7 +826,8 @@
     S.running = false;
     cancelAnimationFrame(S.raf);
     progressEl.style.width = '100%';
-    $('doneTime').textContent = fmt(TOTAL);
+    $('doneTime').textContent = fmt(Math.round(S.spent));
+    releaseWake();
     show('screen-done');
     chime();
     speak('Workout complete. Your eyes thank you.', 900);
@@ -847,10 +855,12 @@
   function startWorkout() {
     S.idx = 0;
     S.elapsedBefore = 0;
+    S.spent = 0;
     S.paused = false;
     S.running = false;
     $('stepTotal').textContent = String(EXERCISES.length);
     audioCtx();          // unlocked by this click
+    holdWake();
     show('screen-work');
     beginExercise();
   }
@@ -859,7 +869,27 @@
     S.running = false;
     cancelAnimationFrame(S.raf);
     hush();
+    releaseWake();
     show('screen-start');
+  }
+
+  /* ---------------- screen wake lock ---------------- */
+
+  // Without this, a phone can auto-lock during the eyes-closed exercises, which pauses the workout.
+  var wakeLock = null;
+
+  function holdWake() {
+    if (wakeLock || !navigator.wakeLock) return;
+    navigator.wakeLock.request('screen').then(function (lock) {
+      wakeLock = lock;
+      lock.addEventListener('release', function () { if (wakeLock === lock) wakeLock = null; });
+    }).catch(function () { /* denied or unsupported: carry on without it */ });
+  }
+
+  function releaseWake() {
+    var lock = wakeLock;
+    wakeLock = null;
+    if (lock) { lock.release().catch(function () {}); }
   }
 
   /* ---------------- controls ---------------- */
@@ -890,6 +920,8 @@
 
   document.addEventListener('keydown', function (e) {
     if (!$('screen-work').classList.contains('is-active')) return;
+    // Let a focused button handle its own Space press (e.g. the mute button).
+    if (e.code === 'Space' && e.target && e.target.tagName === 'BUTTON') return;
     if (e.code === 'Space') { e.preventDefault(); if (S.paused) { resume(); } else { pause(); } }
     else if (e.code === 'ArrowRight') { e.preventDefault(); if (S.running) endExercise(); }
     else if (e.code === 'Escape') { exitWorkout(); }
@@ -897,6 +929,7 @@
 
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) { pause(); }
+    else if (S.running) { holdWake(); }   // the browser drops the lock while hidden
   });
 })();
 </script>

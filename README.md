@@ -1,19 +1,10 @@
-# Eyes Heal
+# Eyes Heal 2
 
-A 4-minute guided eye exercise workout in a single HTML file — no build, no dependencies.
+A quick (< 4 min) guided eye exercise workout in a single HTML file.
 
-## Exercises
+I built Eyesheal in 2019 (https://github.com/vb1lyi/eyesheal), and it was pretty shitty))
 
-1. Slow blinking
-2. Left & right
-3. Up & down
-4. Eye circles
-5. Near & far
-6. Look far away
-7. Palming
-8. Squeeze & release
-
-Voice cues guide you through each step and can be muted.
+This is a polished version.
 
 ## Usage
 
